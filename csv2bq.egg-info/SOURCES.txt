@@ -1,0 +1,9 @@
+LICENSE
+README.md
+setup.py
+csv2bq/__init__.py
+csv2bq/csv2bq.py
+csv2bq.egg-info/PKG-INFO
+csv2bq.egg-info/SOURCES.txt
+csv2bq.egg-info/dependency_links.txt
+csv2bq.egg-info/top_level.txt
