@@ -2,7 +2,20 @@ import os
 import argparse
 from google.cloud import bigquery
 
-def upload_csv_to_bigquery(csv_file_path, project_id, dataset_id, table_id):
+def upload_csv_to_bigquery():
+    """Uploads a CSV file to a given BigQuery table."""
+    # Load arguments
+    parser = argparse.ArgumentParser()
+    parser.add_argument('csv_file', help='Path to the CSV file')
+    parser.add_argument('--project_id', help='Google Cloud project ID')
+    parser.add_argument('--dataset_id', help='BigQuery dataset ID')
+    parser.add_argument('--table_id', help='BigQuery table ID')
+    args = parser.parse_args()
+    csv_file_path = args.csv_file
+    project_id = args.project_id
+    dataset_id = args.dataset_id
+    table_id = args.table_id
+
     # Create a BigQuery client
     client = bigquery.Client(project=project_id)
 
@@ -12,10 +25,11 @@ def upload_csv_to_bigquery(csv_file_path, project_id, dataset_id, table_id):
     if not client.get_dataset(dataset_ref):
         dataset = client.create_dataset(dataset)
 
-    # # Create a BigQuery table
+    # Check if the table exists, create it if necessary
     table_ref = dataset.table(table_id)
     table = bigquery.Table(table_ref)
-    table = client.create_table(table)
+    if not client.get_table(table_ref):
+        table = client.create_table(table)
 
     # Load the CSV data into the table
     job_config = bigquery.LoadJobConfig()
@@ -30,11 +44,4 @@ def upload_csv_to_bigquery(csv_file_path, project_id, dataset_id, table_id):
 
 
 if __name__ == '__main__':
-    parser = argparse.ArgumentParser()
-    parser.add_argument('csv_file', help='Path to the CSV file')
-    parser.add_argument('--project_id', help='Google Cloud project ID')
-    parser.add_argument('--dataset_id', help='BigQuery dataset ID')
-    parser.add_argument('--table_id', help='BigQuery table ID')
-    args = parser.parse_args()
-
-    upload_csv_to_bigquery(args.csv_file, args.project_id, args.dataset_id, args.table_id)
+    upload_csv_to_bigquery()

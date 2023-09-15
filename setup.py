@@ -13,4 +13,9 @@ setup(
     author_email="15026387+kromiii@users.noreply.github.com",
     packages=["csv2bq"],
     install_requires=["google-cloud-bigquery"],
+    entry_points={
+        "console_scripts": [
+            "csv2bq = csv2bq.csv2bq:upload_csv_to_bigquery",
+        ]
+    },
 )
