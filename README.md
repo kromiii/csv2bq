@@ -20,8 +20,10 @@ $ csv2bq sample.csv --project_id=sample --dataset_id=sample --table_id=sample
 
 ## Options
 
-project_id: project id (default: current project id)
-dataset_id: dataset id (required)
-table_id: table id (required)
-mode: append or overwrite (default: append)
-auto_create_table: auto create table (default: True)
+| Parameter | Description |
+| --- | --- |
+| project_id | project id (required) |
+| dataset_id | dataset id (required) |
+| table_id | table id (required) |
+| mode | append or overwrite (default: append) |
+| auto_create_table | auto create table (default: True) |
