@@ -10,11 +10,16 @@ def upload_csv_to_bigquery():
     parser.add_argument('--project_id', help='Google Cloud project ID')
     parser.add_argument('--dataset_id', help='BigQuery dataset ID')
     parser.add_argument('--table_id', help='BigQuery table ID')
+    parser.add_argument('--mode', help='append or overwrite', default='append')
+    parser.add_argument('--auto_create_table', help='auto create table', default=True)    
+
     args = parser.parse_args()
     csv_file_path = args.csv_file
     project_id = args.project_id
     dataset_id = args.dataset_id
     table_id = args.table_id
+    mode = args.mode
+    auto_create_table = args.auto_create_table
 
     # Create a BigQuery client
     client = bigquery.Client(project=project_id)
@@ -22,13 +27,11 @@ def upload_csv_to_bigquery():
     # Check if the dataset exists, create it if necessary
     dataset_ref = client.dataset(dataset_id)
     dataset = bigquery.Dataset(dataset_ref)
-    if not client.get_dataset(dataset_ref):
-        dataset = client.create_dataset(dataset)
 
     # Check if the table exists, create it if necessary
     table_ref = dataset.table(table_id)
     table = bigquery.Table(table_ref)
-    if not client.get_table(table_ref):
+    if (not client.get_table(table_ref)) and auto_create_table:
         table = client.create_table(table)
 
     # Load the CSV data into the table
@@ -36,6 +39,11 @@ def upload_csv_to_bigquery():
     job_config.source_format = bigquery.SourceFormat.CSV
     job_config.skip_leading_rows = 1
     job_config.autodetect = True
+    if mode == 'append':
+        job_config.write_disposition = bigquery.WriteDisposition.WRITE_APPEND
+    elif mode == 'overwrite':
+        job_config.write_disposition = bigquery.WriteDisposition.WRITE_TRUNCATE
+    
     with open(csv_file_path, 'rb') as f:
         job = client.load_table_from_file(f, table_ref, job_config=job_config)
     job.result()
