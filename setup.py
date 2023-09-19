@@ -8,7 +8,7 @@ setup(
     description="upload local csv file to bigquery",
     long_description=readme,
     long_description_content_type="text/markdown",
-    version="0.1.1",
+    version="0.1.2",
     author="Hiroyuki Kuromiya",
     author_email="15026387+kromiii@users.noreply.github.com",
     packages=["csv2bq"],
