@@ -1,6 +1,7 @@
 import os
 import argparse
 from google.cloud import bigquery
+from google.cloud.exceptions import NotFound
 
 def upload_csv_to_bigquery():
     """Uploads a CSV file to a given BigQuery table."""
@@ -11,7 +12,7 @@ def upload_csv_to_bigquery():
     parser.add_argument('--dataset_id', help='BigQuery dataset ID')
     parser.add_argument('--table_id', help='BigQuery table ID')
     parser.add_argument('--mode', help='append or overwrite', default='append')
-    parser.add_argument('--auto_create_table', help='auto create table', default=True)    
+    parser.add_argument('--auto_create_table', help='auto create table', default='True')    
 
     args = parser.parse_args()
     csv_file_path = args.csv_file
@@ -19,20 +20,25 @@ def upload_csv_to_bigquery():
     dataset_id = args.dataset_id
     table_id = args.table_id
     mode = args.mode
-    auto_create_table = args.auto_create_table
+    auto_create_table = args.auto_create_table == 'True'
 
     # Create a BigQuery client
     client = bigquery.Client(project=project_id)
 
-    # Check if the dataset exists, create it if necessary
+    # Check if the dataset exists
     dataset_ref = client.dataset(dataset_id)
     dataset = bigquery.Dataset(dataset_ref)
 
     # Check if the table exists, create it if necessary
     table_ref = dataset.table(table_id)
-    table = bigquery.Table(table_ref)
-    if (not client.get_table(table_ref)) and auto_create_table:
-        table = client.create_table(table)
+    try:
+        client.get_table(table_ref)
+    except NotFound:
+        table = bigquery.Table(table_ref)
+        if auto_create_table:
+            table = client.create_table(table)
+        else:
+            raise Exception('Table not found: {}.{}.{}'.format(project_id, dataset_id, table_id))
 
     # Load the CSV data into the table
     job_config = bigquery.LoadJobConfig()
